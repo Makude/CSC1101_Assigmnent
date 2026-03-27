@@ -10,11 +10,12 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * The staging area where deliveries arrive.
  *
- * Rules from spec:
- * - Unlimited size.
- * - Only stockers take from it.
- * - Only one stocker can take at a time.
- * - Once taken, boxes can't be returned to staging.
+ * Basic rules:
+ * 
+ * Unlimited size.
+ * Only stockers take from it.
+ * Only one stocker can take at a time.
+ * Once taken, boxes can't be returned to staging.
  */
 public class StagingArea {
     private final List<Box> boxes = new ArrayList<>();
@@ -22,7 +23,7 @@ public class StagingArea {
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition notEmpty = lock.newCondition();
 
-    // Spec: only one stocker may take at a time.
+    // Only one stocker may take at a time.
     private final Semaphore takeSemaphore = new Semaphore(1, true);
 
     public void addDelivery(Map<BoxType, Integer> delivered) {
@@ -52,8 +53,7 @@ public class StagingArea {
      * Take up to boxCount boxes from staging.
      * Returns a map of loaded counts by type (always includes all types).
      *
-     * Spec alignment: waiting is expressed in ticks (not wall-clock milliseconds).
-     * We implement this by waiting for at most waitTicks ticks, checking once per tick.
+     * Waiting is tick based (not wall clock). We wait in small chunks and recheck the tick.
      */
     public Map<BoxType, Integer> takeBoxes(int boxCount, long waitTicks, Ticks timer) throws InterruptedException {
         if (boxCount <= 0 || boxCount > 10) {
@@ -80,7 +80,7 @@ public class StagingArea {
                         return loaded;
                     }
 
-                    // Wait up to 1 tick for a delivery; ensured tick-consistent.
+                    // Wait up to 1 tick for a delivery; ensured tick consistent
                     notEmpty.await(1, TimeUnit.MILLISECONDS);
                 }
 

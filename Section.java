@@ -8,10 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A single storage section in the warehouse (e.g. electronics).
- *
- * Thread-safety:
- * - One lock per section.
- * - Pickers wait on notEmpty when the section is empty.
+ * Thread safety:
+ * One lock per section.
+ * Pickers wait on notEmpty when the section is empty.
  */
 public class Section {
 	private final String name;
@@ -21,7 +20,7 @@ public class Section {
 	private final Map<BoxType, List<Box>> boxes = new HashMap<>();
 	private int boxCount = 0;
 
-	// Used for prioritised stocking.
+	// Used for prioritised stocking
 	private int waitingPickers = 0;
 
 	public Section(String name) {
@@ -63,9 +62,7 @@ public class Section {
 		return 1;
 	}
 
-	/**
-	 * Remove one box from any type in this section. Returns null if empty.
-	 */
+	// Remove one box from any type in this section. Returns null if empty
 	public Box takeOneAnyType() {
 		if (boxCount <= 0) return null;
 		for (BoxType t : BoxType.getAllTypes()) {

@@ -1,9 +1,7 @@
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Starts the simulation and wires together the threads + shared objects.
- */
+// Starts the simulation and wires together the threads + shared objects
 public class WarehouseSimulation {
     private final Configuration config;
     private final Logger logger;
@@ -24,7 +22,7 @@ public class WarehouseSimulation {
         logConfiguration();
     }
 
-    /** Prints config to stderr so it doesn’t mix with the event log on stdout. */
+    // Prints config to stderr so it doesn’t mix with the event log on stdout
     private void logConfiguration() {
         System.err.println("=== Warehouse Simulation Configuration ===");
         System.err.println(config.toString());
@@ -33,7 +31,7 @@ public class WarehouseSimulation {
         System.err.println();
     }
 
-    /** Run until the tick clock stops, then shut everything down. */
+    // Run until the tick clock stops, then shut everything down
     public void run() {
         System.err.println("Starting simulation...");
 
@@ -41,23 +39,20 @@ public class WarehouseSimulation {
         timer.start(config.getSimulationDurationTicks());
 
         // Create and start delivery thread
-        DeliveryThread deliveryThread = new DeliveryThread(
-                warehouse, config, timer, logger, System.nanoTime());
+        DeliveryThread deliveryThread = new DeliveryThread(warehouse, config, timer, logger, System.nanoTime());
         threads.add(deliveryThread);
         deliveryThread.start();
 
         // Create and start stocker threads
         for (int i = 1; i <= config.getNumStockers(); i++) {
-            StockerThread stocker = new StockerThread(
-                    i, warehouse, config, timer, logger, System.nanoTime() + i);
+            StockerThread stocker = new StockerThread(i, warehouse, config, timer, logger, System.nanoTime() + i);
             threads.add(stocker);
             stocker.start();
         }
 
         // Create and start picker threads
         for (int i = 1; i <= config.getNumPickers(); i++) {
-            PickerThread picker = new PickerThread(
-                    i, warehouse, config, timer, logger, pickIdCounter, System.nanoTime() + i);
+            PickerThread picker = new PickerThread(i, warehouse, config, timer, logger, pickIdCounter, System.nanoTime() + i);
             threads.add(picker);
             picker.start();
         }
@@ -92,7 +87,7 @@ public class WarehouseSimulation {
         printStatistics();
     }
 
-    /** Final stats go to stderr (again: keep stdout clean for the validator). */
+    // Final stats go to stderr (again: keep stdout clean for the validator)
     private void printStatistics() {
         System.err.println();
         System.err.println("=== Simulation Complete ===");

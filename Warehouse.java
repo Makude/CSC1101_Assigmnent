@@ -207,8 +207,7 @@ public class Warehouse {
         int availableCapacity = 10 - trolley.totalLoad;
         int request = Math.min(boxCount, availableCapacity);
 
-        // Spec: loading takes 1 tick regardless of whether the stocker successfully takes boxes.
-        // Also, spec expresses time in ticks; avoid wall-clock timeouts.
+    // Loading always costs 1 tick (even if we end up taking 0 boxes).
         timer.sleepTicks(1);
 
         Map<BoxType, Integer> loaded = stagingArea.takeBoxes(request, 1000, timer);

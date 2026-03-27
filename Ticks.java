@@ -5,8 +5,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * Central-clock tick source.
  *
  * Tick model:
- * - A single clock thread increments the tick by +1 every tickDurationMs.
- * - Worker threads never increment time; they wait for ticks using sleepTicks/awaitTick.
+ * A single clock thread increments the tick by +1 every tickDurationMs.
+ * Worker threads never increment time; they wait for ticks using sleepTicks/awaitTick.
  */
 public class Ticks {
     private final long tickDurationMs;
@@ -28,7 +28,6 @@ public class Ticks {
 
     /**
      * Start the central clock. Safe to call once.
-     *
      * @param maxTickInclusive stop automatically when tick reaches this value
      */
     public void start(long maxTickInclusive) {
@@ -40,7 +39,7 @@ public class Ticks {
         clockThread.start();
     }
 
-    /** Stop the clock and wake any sleepers. */
+    // Stop the clock and wake any sleepers
     public void stop() {
         running = false;
         lock.lock();
@@ -80,8 +79,8 @@ public class Ticks {
         }
     }
 
-    /** Current simulation tick (central clock). */
-    public long now() {
+    // Current simulation tick (central clock)
+    public long getCurrentTick() {
         lock.lock();
         try {
             return currentTick;
@@ -90,14 +89,7 @@ public class Ticks {
         }
     }
 
-    /** Backwards-compatible name used across the codebase. */
-    public long getCurrentTick() {
-        return now();
-    }
-
-    /**
-     * Wait until the tick reaches at least targetTick.
-     */
+    // Wait until the tick reaches at least targetTick
     public void awaitTick(long targetTick) throws InterruptedException {
         lock.lock();
         try {
@@ -109,36 +101,19 @@ public class Ticks {
         }
     }
 
-    /**
-     * Sleep N ticks according to the central clock.
-     */
+    // Sleep N ticks according to the central clock
     public void sleepTicks(long ticks) throws InterruptedException {
         if (ticks <= 0) return;
-        long start = now();
+        long start = getCurrentTick();
         awaitTick(start + ticks);
     }
 
-    /**
-     * Elapsed real time in milliseconds.
-     */
+    // Elapsed real time in milliseconds
     public long getElapsedRealTimeMs() {
         return System.currentTimeMillis() - startTimeMs;
     }
 
-    /**
-     * Reset tick counter (testing only; clock should be stopped first).
-     */
-    public void reset() {
-        lock.lock();
-        try {
-            currentTick = 0;
-            tickAdvanced.signalAll();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /** Whether the clock is running. */
+    // Whether the clock is running
     public boolean isRunning() {
         return running;
     }

@@ -25,14 +25,12 @@ tick_duration_ms=100            # Milliseconds per simulation tick (affects spee
 num_stockers=1                  # Number of stocker threads
 num_pickers=2                   # Number of picker threads
 num_sections=5                  # Number of warehouse sections
+num_trolleys=-1                 # Use -1 to compute K = floor((num_stockers + num_pickers)/2)
 section_capacity=10             # Max boxes per section (set to 2147483647 for "unlimited")
-delivery_probability=0.01       # Probability of a delivery arriving on each tick
-delivery_mean_interval_ticks=100 # Average ticks between deliveries (used for reporting;
-                                # delivery_probability is the active model)
+delivery_mean_interval_ticks=100 # Average ticks between deliveries (stochastic arrivals)
 simulation_duration_ticks=1000  # Total simulation length
 initial_boxes_per_section=5     # Starting boxes per section (matches its section type)
-stocker_break_interval_ticks=250 # Legacy/optional; breaks are scheduled 200–300 ticks in code
-stocker_break_duration_ticks=150 # Break duration
+stocker_break_duration_ticks=150 # Break duration in ticks
 ```
 
 Notes:

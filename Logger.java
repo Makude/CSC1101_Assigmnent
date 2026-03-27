@@ -3,11 +3,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Thread-safe event logger for warehouse simulation events.
- * All events are formatted as single-line, space-separated key=value pairs.
+ * Thread safe event logger for warehouse simulation events.
+ * All events are formatted as single line, space separated key=value pairs.
  * 
  * Thread-safety: Uses intrinsic lock on this object for synchronized output.
- * This prevents interleaving of log lines from multiple threads.
+ * This prevents inter leaving of log lines from multiple threads.
  */
 public class Logger {
     private final PrintStream out;
@@ -22,12 +22,12 @@ public class Logger {
 
     /**
      * Log an event with specified fields.
-     * Fields are provided as pairs: field1, value1, field2, value2, ...
+     * Fields are provided as individual key=value strings.
      * 
      * @param tick Current simulation tick
-     * @param threadId Thread identifier (e.g., "S1", "P3", "DEL")
-     * @param eventType Type of event (e.g., "acquire_trolley")
-     * @param fields Key-value pairs (alternating strings)
+     * @param threadId Thread identifier (e.g. "S1", "P3", "DEL")
+     * @param eventType Type of event (e.g. "acquire_trolley")
+     * @param fields Additional key=value fields
      */
     public synchronized void log(long tick, String threadId, String eventType, String... fields) {
         StringBuilder sb = new StringBuilder();
@@ -50,9 +50,7 @@ public class Logger {
         }
     }
 
-    /**
-     * Flush all buffered events to output stream.
-     */
+    // Flush all buffered events to output stream
     public synchronized void flush() {
         if (bufferEvents && eventBuffer != null) {
             for (String line : eventBuffer) {
@@ -61,12 +59,5 @@ public class Logger {
             out.flush();
             eventBuffer.clear();
         }
-    }
-
-    /**
-     * Get all logged events (for testing/analysis).
-     */
-    public synchronized List<String> getEvents() {
-        return new ArrayList<>(bufferEvents ? eventBuffer : new ArrayList<>());
     }
 }

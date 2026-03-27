@@ -21,16 +21,12 @@ public enum BoxType {
         return label;
     }
 
-    /**
-     * Get all box types as a sorted array for consistent iteration.
-     */
+    // Get all box types as a sorted array for consistent iteration
     public static BoxType[] getAllTypes() {
         return values();
     }
 
-    /**
-     * Convert a section/label string (e.g. "electronics") to a BoxType.
-     */
+    // Convert a section/label string (e.g. "electronics") to a BoxType
     public static BoxType fromLabel(String label) {
         if (label == null) return null;
         for (BoxType t : values()) {

@@ -75,21 +75,18 @@ public class PickerThread extends Thread {
             boolean success = warehouse.pickFromSection(chosenSection, pickId, trolleyId, threadId);
 
             if (!success) {
-                // Should not happen, but handle gracefully
-                logger.log(timer.getCurrentTick(), threadId, "pick_failed",
-                        "pick_id=" + pickId,
-                        "section=" + chosenSection);
+                // If this ever happens, log it and move on.
+                logger.log(timer.getCurrentTick(), threadId, "pick_failed", "pick_id=" + pickId, "section=" + chosenSection);
             }
 
         } finally {
-            // Release trolley
-            warehouse.releaseTrolley(trolleyId, threadId);
+            warehouse.releaseTrolley(trolleyId, threadId); // Release trolley
         }
     }
 
     /**
      * Random wait (in ticks) between pick attempts.
-     * We aim for ~100 total attempts per 1000 ticks across all pickers, so each picker
+     * We aim for approx 100 total attempts per 1000 ticks across all pickers, so each picker
      * waits on average about (10 * numPickers) ticks between attempts.
      */
     private int getRandomPickIntervalTicks() {
@@ -101,12 +98,5 @@ public class PickerThread extends Thread {
         // Use exponential distribution
         double wait = -meanInterval * Math.log(random.nextDouble());
         return Math.max(1, (int) Math.round(wait));
-    }
-
-    /**
-     * Stop the picker thread gracefully.
-     */
-    public void stopPicker() {
-        running = false;
     }
 }

@@ -15,7 +15,6 @@ public class Configuration {
     private int sectionCapacity;
 
     // Delivery parameters
-    private double deliveryProbability;
     private int deliveryMeanIntervalTicks;
 
     // Simulation parameters
@@ -23,7 +22,6 @@ public class Configuration {
     private int initialBoxesPerSection;
 
     // Stocker parameters
-    private int stockerBreakIntervalTicks;
     private int stockerBreakDurationTicks;
 
     public Configuration() {
@@ -42,21 +40,19 @@ public class Configuration {
         numPickers = 2;
         numSections = 5;
         numTrolleys = -1; // Will compute as (numStockers + numPickers) / 2
-    // Good-level default: sections have limited capacity (spec example uses 10).
-    // You can set this to Integer.MAX_VALUE in warehouse.properties to emulate minimal.
-    sectionCapacity = 10;
+        // Good-level default: sections have limited capacity (spec example uses 10).
+        // You can set this to Integer.MAX_VALUE in warehouse.properties to emulate minimal.
+        sectionCapacity = 10;
 
         // Delivery parameters
-        deliveryProbability = 0.01;
         deliveryMeanIntervalTicks = 100;
 
         // Simulation parameters
         simulationDurationTicks = 10000;
-    // Spec says you can assume initial stock exists; keep configurable.
-    initialBoxesPerSection = 5;
+    
+        initialBoxesPerSection = 5;
 
         // Stocker parameters
-        stockerBreakIntervalTicks = 250;
         stockerBreakDurationTicks = 150;
     }
 
@@ -81,16 +77,12 @@ public class Configuration {
                 numTrolleys = Integer.parseInt(props.getProperty("num_trolleys"));
             if (props.containsKey("section_capacity"))
                 sectionCapacity = Integer.parseInt(props.getProperty("section_capacity"));
-            if (props.containsKey("delivery_probability"))
-                deliveryProbability = Double.parseDouble(props.getProperty("delivery_probability"));
             if (props.containsKey("delivery_mean_interval_ticks"))
                 deliveryMeanIntervalTicks = Integer.parseInt(props.getProperty("delivery_mean_interval_ticks"));
             if (props.containsKey("simulation_duration_ticks"))
                 simulationDurationTicks = Long.parseLong(props.getProperty("simulation_duration_ticks"));
             if (props.containsKey("initial_boxes_per_section"))
                 initialBoxesPerSection = Integer.parseInt(props.getProperty("initial_boxes_per_section"));
-            if (props.containsKey("stocker_break_interval_ticks"))
-                stockerBreakIntervalTicks = Integer.parseInt(props.getProperty("stocker_break_interval_ticks"));
             if (props.containsKey("stocker_break_duration_ticks"))
                 stockerBreakDurationTicks = Integer.parseInt(props.getProperty("stocker_break_duration_ticks"));
         } catch (IOException e) {
@@ -153,10 +145,6 @@ public class Configuration {
         return sectionCapacity;
     }
 
-    public double getDeliveryProbability() {
-        return deliveryProbability;
-    }
-
     public int getDeliveryMeanIntervalTicks() {
         return deliveryMeanIntervalTicks;
     }
@@ -167,10 +155,6 @@ public class Configuration {
 
     public int getInitialBoxesPerSection() {
         return initialBoxesPerSection;
-    }
-
-    public int getStockerBreakIntervalTicks() {
-        return stockerBreakIntervalTicks;
     }
 
     public int getStockerBreakDurationTicks() {
@@ -186,7 +170,6 @@ public class Configuration {
                 "  numSections=" + numSections + "\n" +
                 "  numTrolleys=" + numTrolleys + " (effective: " + getEffectiveNumTrolleys() + ")\n" +
                 "  sectionCapacity=" + sectionCapacity + "\n" +
-                "  deliveryProbability=" + deliveryProbability + "\n" +
                 "  simulationDurationTicks=" + simulationDurationTicks + "\n" +
                 '}';
     }

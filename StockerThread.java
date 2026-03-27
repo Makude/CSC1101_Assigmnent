@@ -3,7 +3,6 @@ import java.util.*;
 /**
  * Stocker worker.
  * Moves boxes from staging into sections, using a trolley.
- *
  * Rough loop: get a trolley -> load up to 10 boxes -> stock until empty -> return trolley.
  */
 public class StockerThread extends Thread {
@@ -26,7 +25,7 @@ public class StockerThread extends Thread {
         this.logger = logger;
         this.random = new Random(randomSeed + stockerId);
         this.running = true;
-    // Next break is anytime 200–300 ticks from now (including the first one).
+    // Next break is anytime 200–300 ticks from now
         scheduleNextBreak();
     }
 
@@ -57,22 +56,21 @@ public class StockerThread extends Thread {
                         continue;
                     }
 
-                    // Stock boxes into sections
-                    stockBoxes(trolleyId, threadId);
+                    stockBoxes(trolleyId, threadId); // Stock boxes into sections
 
-                    // Only release when it's empty. If sections are full, back off and try again.
-                    while (warehouse.getTrolleyLoad(trolleyId) > 0
-                            && running
-                            && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
-                        // Back off a bit to allow pickers to free space in sections.
+                    // Only release when it's empty. If sections are full, back off and try again
+                    while (warehouse.getTrolleyLoad(trolleyId) > 0 && running && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
+                        
+                        // Back off a bit to allow pickers to free space in sections
                         timer.sleepTicks(5);
                         stockBoxes(trolleyId, threadId);
                     }
 
-                    // Release trolley (Warehouse.releaseTrolley enforces empty).
-                    // If time runs out while still carrying load, just stop trying.
-                    if (warehouse.getTrolleyLoad(trolleyId) == 0
-                            && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
+                    /** 
+                     *  Release trolley (Warehouse.releaseTrolley enforces empty).
+                     *  If time runs out while still carrying load, just stop trying. 
+                     */
+                    if (warehouse.getTrolleyLoad(trolleyId) == 0 && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
                         warehouse.releaseTrolley(trolleyId, threadId);
                     }
 
@@ -90,13 +88,12 @@ public class StockerThread extends Thread {
         running = false;
     }
 
-    /** Stock what’s currently on the trolley until it’s empty (or the run ends). */
+    // Stock what’s currently on the trolley until it’s empty (or the run ends)
     private void stockBoxes(int trolleyId, String threadId) throws InterruptedException {
         String currentLocation = "staging";
 
-    while (warehouse.getTrolleyLoad(trolleyId) > 0
-        && running
-        && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
+    while (warehouse.getTrolleyLoad(trolleyId) > 0 && running && timer.getCurrentTick() < config.getSimulationDurationTicks()) {
+            
             // Get what's on the trolley
             Map<BoxType, Integer> trolleyBoxes = warehouse.getTrolleyBoxes(trolleyId);
 
@@ -124,12 +121,11 @@ public class StockerThread extends Thread {
                 int stocked = warehouse.stockSection(targetSection, trolleyId, nextBoxType, threadId);
                 // If nothing was stocked (section full), move to another section or staging
                 if (stocked == 0) {
-                    // Section is full. Spec allows releasing the lock and then waiting/choosing another action.
-                    // Policy here: back off briefly and try again (either this or another section).
+                    // Section full. Back off briefly and then try again
                     timer.sleepTicks(5);
                 }
             } catch (Exception e) {
-                // Error stocking, skip to next section
+                // Error occurred while stocking, skip this section.
                 continue;
             }
         }
@@ -140,24 +136,20 @@ public class StockerThread extends Thread {
         }
     }
 
-    /**
-     * Determine if stocker should take a break.
-     */
+    // Determine if stocker should take a break
     private boolean shouldTakeBreak() {
         return timer.getCurrentTick() >= nextBreakAtTick;
     }
 
     private void scheduleNextBreak() {
-        // Spec: every 200–300 ticks take a break.
+    // Break roughly every 200–300 ticks.
         int min = 200;
         int max = 300;
         int interval = min + random.nextInt(max - min + 1);
         nextBreakAtTick = timer.getCurrentTick() + interval;
     }
 
-    /**
-     * Take a break for configured duration.
-     */
+    // Take a break for configured duration
     private void takeBreak(String threadId) {
         int breakDuration = config.getStockerBreakDurationTicks();
     logger.log(timer.getCurrentTick(), threadId, "start_break",
@@ -173,10 +165,4 @@ public class StockerThread extends Thread {
         logger.log(timer.getCurrentTick(), threadId, "end_break");
     }
 
-    /**
-     * Stop the stocker thread gracefully.
-     */
-    public void stopStocker() {
-        running = false;
-    }
 }

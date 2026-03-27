@@ -67,7 +67,7 @@ public class DeliveryThread extends Thread {
         running = false;
     }
 
-    /** Random ticks until the next delivery (exponential distribution). */
+    // Random ticks until the next delivery (exponential distribution).
     private int getRandomInterArrivalTicks() {
         double mean = config.getDeliveryMeanIntervalTicks();
         // Exponential distribution: -mean * ln(random)
@@ -99,10 +99,4 @@ public class DeliveryThread extends Thread {
         return delivery;
     }
 
-    /**
-     * Stop the delivery thread gracefully.
-     */
-    public void stopDelivery() {
-        running = false;
-    }
 }
