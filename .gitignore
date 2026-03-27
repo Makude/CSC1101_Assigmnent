@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Java build output
+bin/
+*.class
+warehouse/
+
+# Generated run artifacts
+*.log
+*.err
+

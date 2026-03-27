@@ -1,0 +1,199 @@
+Problem specification:
+A warehouse operates 24 hours a day, 365 days a year. The warehouse has multiple sections to store boxes: electronics, books, medicines, clothes, tools, etc.
+
+Time in the warehouse is measured in ticks. There are 1000 ticks in a day. Every 100 ticks (on average) a delivery is made of 10 boxes, with a random number of box types for each of the above categories (totalling 10 boxes) e.g., 4 boxes for electronics, 2 boxes of books, 1 box of medicines, 1 box of clothes, and 2 boxes of tools.
+
+When a delivery of boxes arrives, they are put into a staging area, where a stocker in the warehouse can put (stock) the boxes into their respective sections (assuming the stocker is not already busy). Only one stocker can take boxes from the staging area at a time, and once taken cannot return any boxes to the staging area. The staging area is of unlimited size. Once they are finished another stocker can then take boxes from the staging area. Taking from the staging area takes 1 tick regardless of the number of boxes taken. Each stocker can move up to 10 boxes at once, which could be a mix of any 10 boxes e.g. 5 boxes of medicines, 3 boxes of electronics, 2 boxes of books. Only one stocker can be stocking a particular section at any one time (e.g. electronics). Once a stocker is stocking a section, any other arriving stocker(s) wishing to stock that section will need to wait.
+
+If a section contains at least one box, a picker can take a box from that section. If a picker arrives while a section is being stocked, they will need to wait for the stocker to finish stocking that section, however, multiple pickers can take from a section once it is not being stocked. A stocker may partly stock a section e.g. they only stock 3 of the 5 boxes of electronics they are moving in that section (because it is now full), where they can either wait for availability in that section to stock more (releasing any locks), move onto another section, or return to the staging area to collect more boxes i.e. if the section becomes full, the stocker must release exclusive access to the section, and only then may wait for space / decide next action. It takes a picker 1 tick to take a box from a section. Pickers never take boxes directly from the staging area.
+
+Pick attempts occur at an average rate that converges to approximately 100 attempts per day across all pickers (combined). How this rate is achieved is up to your design. The section is chosen randomly once per pick attempt and must not be changed during that attempt, even if the section is empty. This selection must be logged using a pick_start event before any waiting occurs. If the section is empty, the picker will wait until a box for that section becomes available. This means there may be times where a particular section does not contain any boxes, and the picker(s) will wait until a box for that section is available.
+
+It takes a stocker 10 ticks to move from where the deliveries arrive (the staging area) to a particular section (e.g., electronics), and 1 tick extra for every box they are moving to that section. Additionally, for every box they put in the section, it takes 1 tick. In this example, it would take 20 ticks for a stocker to move 10 boxes to the electronics section, and another 10 ticks to stock that section with all 10 boxes. If they return to the staging area where boxes arrive from any section, it will take 10 ticks, and 1 tick extra for every box they still possess (i.e. boxes they have not yet put into a section).
+
+If a stocker is moving boxes to stock multiple sections, it will take them 10 ticks to move from one section to another section to begin stocking that section plus 1 tick for every remaining box (to be stocked) that they possess. For example, they may stock some electronics boxes first, and then move to another section. When they are finished, they return to the staging area to see if there are more boxes to be stocked, if not, they wait. The journey from any section back to the staging area where boxes arrive takes 10 ticks. 
+
+
+Note: Approximately 100 boxes arrive per day on average. For a well-balanced simulation, the expected total number of completed picks per day should be of a comparable order. Even when long-term averages are similar, short-term randomness may leave some sections empty, causing pickers to wait, or stockers waiting for space to free up in sections (if capacities are enforced).
+
+
+
+
+Task:
+Design a software system in Java to simulate the concurrent operation of the warehouse. Assume that boxes are the resources, and the different activities are conducted in threads e.g., pickers, stockers, etc. 
+
+Example of output:
+…
+tick=120 tid=DEL event=delivery_arrived electronics=7 books=0 medicines=1 clothes=2 tools=0
+tick=... tid=S1 event=acquire_trolley trolley_id=3 waited_ticks=2
+tick=... tid=S1 event=stocker_load electronics=4 books=3 medicines=0 clothes=3 tools=0 total_load=10
+tick=... tid=S1 event=move from=staging to=electronics load=10 trolley_id=3
+tick=... tid=S1 event=stock_begin section=electronics amount=4 trolley_id=3
+tick=... tid=S1 event=stock_end section=electronics stocked=3 remaining_load=7 trolley_id=3
+tick=... tid=S1 event=move from=electronics to=clothes load=7 trolley_id=3
+tick=... tid=S1 event=stock_begin section=clothes amount=3 trolley_id=3
+tick=... tid=S1 event=stock_end section=clothes stocked=3 remaining_load=4 trolley_id=3
+tick=... tid=S1 event=move from=clothes to=staging load=4 trolley_id=3
+tick=... tid=S1 event=release_trolley trolley_id=3 remaining_load=0
+….
+tick=... tid=P7 event=acquire_trolley trolley_id=1 waited_ticks=0
+tick=... tid=P7 event=pick_start pick_id=88 section=clothes trolley_id=1
+tick=... tid=P7 event=pick_done pick_id=88 section=clothes waited_ticks=0 trolley_id=1
+tick=... tid=P7 event=release_trolley trolley_id=1
+…
+
+Logging requirements:
+
+Every picker attempt must include a unique pick_id, which appears in exactly one pick_start and exactly one pick_done.
+
+pick_done must include waited_ticks (total ticks spent waiting during that pick attempt for the chosen section to have available stock).
+
+stock_end must include both stocked and remaining_load (total boxes still on the trolley after this stock attempt).
+
+acquire_trolley / release_trolley events must be logged with trolley_id, and a trolley must not be released while remaining_load > 0.
+
+This output should be printed to the terminal window. Ensure that it is clear, consistent, and machine-parseable. Each log entry must appear on a single line and fields must be space-separated key=value pairs. Interesting/noteworthy excerpts of this should be discussed in your video.
+
+**Note: the example above includes trolley events (good project and above feature). Minimal submissions may omit trolley events.
+
+Deliverables and instructions for submission: 
+
+The assignment is a two person project, worth 30% of the overall module mark and has to be programmed in Java. Submission is through Loop. You are required to submit a zip file named with both of your students ids (e.g. 1234567_87654321.zip) containing: 
+
+All your source files. I should be able to compile your code with “javac “ and execute it with “java”. Don’t count on me to install non-standard libraries! I will use Java SE25 (LTS) to test your code.
+
+
+A short PDF design documentation (6* pages max). The report should (among other things) describe/provide:
+
+
+*List of working functionality - what aspects of the project you got working / not working / partly working (this should be presented on a table - a sample table is provided at the end of this document)
+
+
+Running the code - how to compile and run the code (on Linux/Ubuntu) - and details if there is a config file to change parameters, special parameters, etc
+
+
+ The considered tasks/dependencies in your program
+
+
+ Patterns/strategies used to manage concurrency
+
+
+Detailed description of how your solution addresses issues like fairness, prevention of starvation, and ensuring the system continues to make progress over time, etc.
+
+*These sections that must be clearly indicated in your report: (1) List of working functionality, (2) Division of work and (3) Running the code.
+You might decide to structure (4), (5) and (6) differently (e.g., merge 4 & 5 but break 6 into two fields) - these are indicative of the type of detail I expect.
+
+
+A video (5 minutes max) describing the structure of your code and showing the working of your solution (demonstration of interesting execution scenarios is important). You will need to put your video on Google drive and include a link to at the beginning of your design document. Please ensure I have access to this (graham.healy@dcu.ie). In your video, ensure you provide a walkthrough of the code highlighting key aspects of the concurrency implementation and its mechanics e.g. showing what happens when a stocker arrives to a section where they must wait, how stockers prioritise in stocking sections, how fairness is addressed, ... Both project partners are expected to speak in the video.
+
+
+A completed plagiarism declaration form for each student.
+
+
+The due date of this assignment is by 23:59 on the 22nd March 2026.
+
+The due date of this assignment is by 23:59 on the 27th March 2026.
+
+Where the students feel they have implemented an excellent project, and wish to show supplementary results/data (e.g. of a comparative analysis of different concurrency schemes), they may use up to an additional 2 pages at the end of the document, that should be clearly labelled as “Appendix”.
+
+Projects should not incorporate non-functional features solely to create the appearance of proper operation e.g. a placeholder in the code to print a stocker is taking a break but with no corresponding working implementation. Similarly, you will lose marks if your code contains superfluous logic. 
+
+It is expected that the simulation continues to make progress over time for the duration of the simulation (i.e., stock is periodically moved from staging into sections and pick attempts continue to complete; the system must not reach a state where all threads are waiting indefinitely). Workarounds that bypass the resource constraints (e.g., silently increasing K, ignoring hold-until-empty, releasing a trolley while holding box(es), or changing the chosen section mid-attempt) will be penalised.
+
+
+Grading
+Before moving from the minimal to good, or good to excellent, ensure that you have all functionality working for the previous level (minimal / good) e.g. features from the excellent project category will not be considered unless the specification for good is fully implemented.
+
+
+A minimal version of the project: 
+To pass the assignment, it could be created following these assumptions: 
+
+A delivery of 10 boxes is made with a probability of .01 every tick.
+
+
+Capacity is unlimited within each section
+
+
+1 stocker (threaded) / multiple pickers (threaded)
+
+
+5 sections e.g., electronics, medicines, books, clothes, and tools.
+
+
+Real-time reporting (as above)
+
+
+A variable defined in your code (that I can adjust) that determines how long in milliseconds a tick is (e.g. 100ms)
+
+
+A good project: 
+The specifications above are a minimum requirement to pass this assignment. For good work, I expect: 
+
+More than 1 stocker
+
+
+Prioritising stocking boxes in certain section based on the number of pickers waiting/empty sections (to minimise picker wait time)
+
+
+Sections with a limited capacity e.g., each section may only hold 10 boxes
+
+
+Configurable parameters (e.g., number of stockers, number of sections, control of probabilities of picker behaviour, etc.) via config file.
+
+
+Breaks taken by stockers (e.g., every 200-300 ticks a stocker will take a break of 150 ticks).
+
+
+Pickers and stockers must acquire a trolley before they can begin their task. A stocker must acquire a trolley before collecting boxes from the staging area and hold that trolley until it is empty. A picker must acquire a trolley before attempting to take a box from a section and holds that trolley while waiting and until one box has been successfully removed. A trolley may only be released when it is empty. Trolleys can store at most 10 boxes and are shared between pickers and stockers. The total number of trolleys is K, an adjustable parameter. By default, K = floor((num_stockers + num_pickers)/2) (i.e., integer division). You can assume once a trolley is available, it is immediately available to either a picker or a stocker i.e. the trolley does not need to be moved from a section to the staging area, etc. 
+
+ 
+
+An excellent project: 
+The project would need to contain higher forms of creativity that go beyond a good project (that is meet the criteria of a good project) e.g., 
+
+Analysis of tradeoffs between different statistics like average waiting for pickers vs amount of time each stocker spent working for different approaches to the problem - (comparative simulation analysis with evidence).
+
+
+…
+
+ 
+
+Some other points:
+If a delivery of 10 boxes arrives every 100 ticks, the probability that a delivery arrives on any single tick is 1/100. You may model deliveries using either a per-tick probability (e.g. 0.01) or random inter-arrival waiting times with mean 100 ticks. Use one approach consistently and describe it in your report. You can simulate this using one of Java’s random functions e.g.:
+
+
+Random randgen = new Random(seed); //  set a seed to replicate behaviour
+
+…
+
+your_wait_ticks ( 2 * randgen.nextDouble() * 100 )
+
+ 
+
+The idea here is that there will be differing times between boxes deliveries, but the average wait time will converge to 100.
+
+You can assume each section of the warehouse begins with 5 boxes e.g., electronics=5, clothes=5, tools=5, ....
+
+
+Remember: A key purpose of this assignment is for individuals to demonstrate they understand issues related to concurrency, and how they can be addressed. Use this as an opportunity to showcase what you have learned.
+
+
+Code should be commented.
+
+
+FAQs
+What is the mapping between time versus ticks?
+The idea of using ticks ( e.g., instead of seconds, minutes, etc), is that the mapping can be adjusted.
+For example, if you want to wait 10 ticks, you could Thread.sleep(10 * TICK_TIME_SIZE), where TICK_TIME_SIZE = .1 seconds. By changing TICK_TIME_SIZE, you can change the speed the program runs at, and hence the speed the output is produced at. The minimum TICK_TIME_SIZE I will use is 50ms. 
+
+If a delivery arrives every 100 ticks (on average), and the probability that a delivery arrives on any single tick is 1/100, does this mean that it is possible two deliveries could be made consecutively one after the other?
+Yes.
+
+Should the stocker(s) / picker(s) be threads?
+Yes.
+
+Can there be multiple pickers in the warehouse or at a section at the same time?
+Yes.
+
+Will a picker only take one box and then leave?
+Yes.
